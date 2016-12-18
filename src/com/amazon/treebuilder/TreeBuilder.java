@@ -1,8 +1,19 @@
 package com.amazon.treebuilder;
 
+import java.util.Arrays;
+
 public class TreeBuilder {
 
-	private static class Node {
+	private Node root;
+	
+	public TreeBuilder() {
+	}
+	
+	public Node getRoot() {
+		return root;
+	}
+
+	private class Node {
 		
 		private int value;
 		private Node left;
@@ -14,18 +25,6 @@ public class TreeBuilder {
 			right = null;
 		}
 
-		public int getValue() {
-			return value;
-		}
-
-		public Node getLeft() {
-			return left;
-		}
-
-		public Node getRight() {
-			return right;
-		}
-
 		public void setLeft(Node left) {
 			this.left = left;
 		}
@@ -33,67 +32,88 @@ public class TreeBuilder {
 		public void setRight(Node right) {
 			this.right = right;
 		}
+	}
+
+	private void build(int[] preorder, int[] inorder) throws IllegalTreeException {
+		this.root = buildTree(preorder, inorder);
+	}
+
+	private Node buildTree(int[] preorder, int[] inorder) throws IllegalTreeException {
 		
-		public void setValue(int value) {
-			this.value = value;
+		if (preorder.length != inorder.length) {
+			throw new IllegalTreeException("What are you trying to pull?  These trees ain't the same length.");
 		}
+		
+		Node root = null;
+		
+		if (preorder.length > 0) { 
+			root = new Node(preorder[0]);
+			Integer inIndex = findRootIndexInInorder(inorder, root.value);
+			
+			if (inIndex == null) {
+				throw new IllegalTreeException("Oh you done did it again.  This root ain't in both trees.");
+			}
+			
+			if (inIndex > 0) {
+				root.setLeft(buildTree(Arrays.copyOfRange(preorder, 1, inIndex + 1),
+						Arrays.copyOfRange(inorder, 0, inIndex)));
+			}
+			if (inIndex + 1 <= preorder.length) {
+				root.setRight(buildTree(Arrays.copyOfRange(preorder, inIndex + 1, preorder.length),
+						Arrays.copyOfRange(inorder, inIndex + 1, inorder.length)));
+			}
+		} 
+		
+		return root;
 	}
 	
+	private Integer findRootIndexInInorder(int[] inorder, int value) {
+		
+		Integer inIndex;
+		
+		for (inIndex = new Integer(0); inIndex < inorder.length; inIndex++) {
+			if (inorder[inIndex] == value) {
+				return inIndex;
+			}
+		}
+		
+		return null;
+	}
+
+	private static void printPreorder(Node root) {
+		System.out.print(root.value + " ");
+		if (root.left != null) {
+			printPreorder(root.left);
+		}		
+		if (root.right != null) {
+			printPreorder(root.right);
+		}
+	}
+
+	private static void printInorder(Node root) {
+		if (root.left != null) {
+			printInorder(root.left);
+		}		
+		System.out.print(root.value + " ");
+		if (root.right != null) {
+			printInorder(root.right);
+		}
+	}
+
 	public static void main(String[] args) {
 		
 		int[] preorder = {4, 2, 1, 3, 6, 5, 7};
 		int[] inorder = {1, 2, 3, 4, 5, 6, 7};
 		
+		TreeBuilder builder = new TreeBuilder();
+		
 		try {
-			Node root = buildTree(inorder, preorder);
+			builder.build(preorder, inorder);
+			printInorder(builder.getRoot());
+			System.out.println();
+			printPreorder(builder.getRoot());
 		} catch (IllegalTreeException e) {
 			System.out.println(e.getMessage());
 		}
-		
-		
-	}
-
-	private static Node buildTree(int[] inorder, int[] preorder) throws IllegalTreeException {
-
-		if (preorder.length == 0) {
-			throw new IllegalTreeException("That tree is dead.  It ain't got no root element.");
-		}
-		
-		if (preorder.length != inorder.length) {
-			throw new IllegalTreeException("What are you trying to pull?  These trees ain't the same length man.");
-		}
-		
-		Node root = new Node(preorder[0]);
-		
-		if (preorder.length > 1) { 
-			int preIndex;
-			int inIndex;
-
-			boolean found = false;
-			for (inIndex = 0; inIndex < inorder.length; inIndex++) {
-				if (inorder[inIndex] == root.value) {
-					found = true;
-					break;
-				}
-			}
-			
-			if (!found) {
-				throw new IllegalTreeException("Oh you done did it again.  These trees ain't got the same values.");
-			}
-			
-			if (inIndex > 0) {
-				root.setLeft(new Node(preorder[1]));
-				if (inIndex + 1 <= preorder.length) {
-					root.setRight(new Node(preorder[inIndex + 1]));
-				}
-			}
-			else {
-				root.setRight(new Node(preorder[1]));
-			}
-		} 
-		
-		
-		return root;
-		
 	}
 }
