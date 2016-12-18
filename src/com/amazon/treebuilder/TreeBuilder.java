@@ -83,7 +83,9 @@ public class TreeBuilder {
 			
 			if (inIndex > 0) {
 				root.setLeft(new Node(preorder[1]));
-				root.setRight(new Node(preorder[inIndex + 1]));
+				if (inIndex + 1 <= preorder.length) {
+					root.setRight(new Node(preorder[inIndex + 1]));
+				}
 			}
 			else {
 				root.setRight(new Node(preorder[1]));
