@@ -1,6 +1,8 @@
 package com.amazon.treebuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class TreeBuilder {
 
@@ -51,7 +53,8 @@ public class TreeBuilder {
 			Integer inIndex = findRootIndexInInorder(inorder, root.value);
 			
 			if (inIndex == null) {
-				throw new IllegalTreeException("Oh you done did it again.  This root ain't in both trees.");
+				throw new IllegalTreeException("Oh you done did it again.  This value ain't in both trees "
+						+ "or is a duplicate: " + root.value + ".");
 			}
 			
 			if (inIndex > 0) {
@@ -102,18 +105,36 @@ public class TreeBuilder {
 
 	public static void main(String[] args) {
 		
-		int[] preorder = {4, 2, 1, 3, 6, 5, 7};
-		int[] inorder = {1, 2, 3, 4, 5, 6, 7};
+		List<int[]> inputs = new ArrayList<>();
+		
+		//Working test case
+		inputs.add(new int[]{4, 2, 1, 3, 6, 5, 7});
+		inputs.add(new int[]{1, 2, 3, 4, 5, 6, 7});
+		
+		//Missing root
+		inputs.add(new int[]{4, 2, 1, 3, 6, 5, 7});
+		inputs.add(new int[]{1, 2, 3, 5, 5, 6, 7});
+		
+		//Different lengths
+		inputs.add(new int[]{4, 2, 1, 3, 6, 5, 7});
+		inputs.add(new int[]{1, 2, 3, 4, 5, 6});
+		
+		//Contains duplicates
+		inputs.add(new int[]{7, 7, 1, 3, 7, 5, 7});
+		inputs.add(new int[]{1, 7, 3, 7, 5, 7, 7});
 		
 		TreeBuilder builder = new TreeBuilder();
 		
-		try {
-			builder.build(preorder, inorder);
-			printInorder(builder.getRoot());
-			System.out.println();
-			printPreorder(builder.getRoot());
-		} catch (IllegalTreeException e) {
-			System.out.println(e.getMessage());
+		for (int i = 0; i < inputs.size(); i += 2) {
+			try {
+				builder.build(inputs.get(i), inputs.get(i + 1));
+				printInorder(builder.getRoot());
+				System.out.println();
+				printPreorder(builder.getRoot());
+				System.out.println();
+			} catch (IllegalTreeException e) {
+				System.out.println(e.getMessage());
+			}
 		}
 	}
 }
